@@ -1,0 +1,30 @@
+.container {
+    display: flex;
+    border: 2px solid gray;
+    background-color: #f3f3f3;
+    justify-content: space-around;
+    flex-direction: column;
+    width: 400px;
+    padding: 15px;
+}
+.product-item {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.product-features {
+    flex-direction: column;
+    margin: 0 15px;
+    flex: 1;
+}
+
+.product-features div {
+     padding: 5px 0;
+}
+
+.to-cart {
+    text-align: center;
+}
+
+
+
