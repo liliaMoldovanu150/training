@@ -4,76 +4,100 @@ session_start();
 
 require_once './config.php';
 
-try {
-
-    $GLOBALS['pdo'] = new PDO('mysql:host=' . $servername . ';dbname=' . $dbname, $username, $password);
-
-    $GLOBALS['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo 'Could not connect to database.' . $e->getMessage();
+if (!isset($_SESSION['id'])) {
+    $_SESSION['id'] = array();
 }
 
-function getAllProducts()
+function connection()
+{
+    try {
+        $pdo = new PDO('mysql:host=' . servname . ';dbname=' . dbname, username, password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $pdo;
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+function getAllProducts(): array
 {
     try {
         $sql = 'SELECT * FROM products';
-        $stmt = $GLOBALS['pdo']->prepare($sql);
+        $stmt = connection()->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        echo 'Could not fetch products.' . $e->getMessage();
+        throw $e;
     }
 }
 
-function getAvailableProducts()
+function getAvailableProducts(): array
 {
     try {
         $cartIds = $_SESSION['id'];
         $inQuery = implode(',', array_fill(0, count($cartIds), '?'));
-        $sql = 'SELECT * FROM products WHERE id NOT IN(' . $inQuery . ');';
-        $stmt = $GLOBALS['pdo']->prepare($sql);
+        $sql = 'SELECT * FROM products WHERE id NOT IN (' . $inQuery . ');';
+        $stmt = connection()->prepare($sql);
         foreach ($cartIds as $k => $id) {
             $stmt->bindValue(($k+1), $id);
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        echo 'Could not fetch products.' . $e->getMessage();
+        throw $e;
     }
 }
 
-function getCartProducts()
+function productExists($productId): array
 {
     try {
-        $cartIds = $_SESSION['id'];
+        $sql = 'SELECT * FROM products WHERE id=?;';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $productId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+function getCartProducts(): array
+{
+    $cartIds = $_SESSION['id'];
+
+    if (!count($cartIds)) {
+        return [];
+    }
+
+    try {
         $inQuery = implode(',', array_fill(0, count($cartIds), '?'));
-        $sql = 'SELECT * FROM products WHERE id IN(' . $inQuery . ');';
-        $stmt = $GLOBALS['pdo']->prepare($sql);
+        $sql = 'SELECT * FROM products WHERE id IN (' . $inQuery . ');';
+        $stmt = connection()->prepare($sql);
         foreach ($cartIds as $k => $id) {
             $stmt->bindValue(($k+1), $id);
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        echo 'Could not fetch products.' . $e->getMessage();
+        throw $e;
     }
 }
 
-function showProducts($action, $product)
+function translate($label): string
 {
-    $linkName = ucwords($action);
-    return <<<HTML
-        <div class="product-item">
-        <div class="product-image">
-        <img src="{$product['image_url']}" alt="product-image">
-        </div>
-        <div class="product-features">
-        <div>{$product['title']}</div>
-        <div>{$product['description']}</div>
-        <div>{$product['price']}</div>
-        </div>
-        <a href="action.php?action={$action}&id={$product['id']}">{$linkName}</a>
-        </div>
-        <br>
-    HTML;
+    $translations = [
+        'go_to_cart' => 'Go to cart',
+        'add' => 'Add',
+        'remove' => 'Remove',
+        'go_to_index' => 'Go to index',
+        'checkout' => 'Checkout',
+        'login' => 'Login',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'logout' => 'Logout',
+        'products' => 'Products',
+        'browse' => 'Browse',
+        'save' => 'Save'
+    ];
+    return $translations[$label];
 }

@@ -1,6 +1,6 @@
 <?php
 
-$servername = 'somehost';
-$username = 'someusername';
-$password = 'somepassword';
-$dbname = 'somedbname';
+define('servname', 'somehost');
+define('username', 'someuser');
+define('password', 'somepassword');
+define('dbname', 'somedbname');
