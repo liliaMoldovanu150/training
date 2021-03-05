@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
 
     if ($email) {
         removeAllItemsFromCart();
-        $cartProducts = getCartProducts();
+        header('Location: ./index.php');
     }
 }
 ?>
@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
     <?php endforeach; ?>
     <div class="total-price">Total Price: <?= $totalPrice; ?></div>
 <?php else: ?>
-    <p><?= $email ? 'You have successfully placed your order.' : 'Your cart is empty.'; ?></p>
+    <p><?= 'Your cart is empty.'; ?></p>
 <?php endif; ?>
 <form action="./cart.php" method="post">
     <input
