@@ -39,7 +39,7 @@ function getAvailableProducts(): array
         $sql = 'SELECT * FROM products WHERE id NOT IN (' . $inQuery . ');';
         $stmt = connection()->prepare($sql);
         foreach ($cartIds as $k => $id) {
-            $stmt->bindValue(($k+1), $id);
+            $stmt->bindValue(($k + 1), $id);
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -74,7 +74,7 @@ function getCartProducts(): array
         $sql = 'SELECT * FROM products WHERE id IN (' . $inQuery . ');';
         $stmt = connection()->prepare($sql);
         foreach ($cartIds as $k => $id) {
-            $stmt->bindValue(($k+1), $id);
+            $stmt->bindValue(($k + 1), $id);
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -83,21 +83,32 @@ function getCartProducts(): array
     }
 }
 
+function addItemToCart(): array
+{
+    if (count(productExists($_GET['id']))) {
+        array_push($_SESSION['id'], $_GET['id']);
+    }
+    return $_SESSION['id'];
+}
+
+function removeItemFromCart(): array
+{
+    $key = array_search($_GET['id'], $_SESSION['id']);
+    unset($_SESSION['id'][$key]);
+    $_SESSION['id'] = array_values($_SESSION['id']);
+    return $_SESSION['id'];
+}
+
+function removeAllItemsFromCart(): array
+{
+    $_SESSION['id'] = [];
+    return $_SESSION['id'];
+}
+
 function translate($label): string
 {
-    $translations = [
-        'go_to_cart' => 'Go to cart',
-        'add' => 'Add',
-        'remove' => 'Remove',
-        'go_to_index' => 'Go to index',
-        'checkout' => 'Checkout',
-        'login' => 'Login',
-        'edit' => 'Edit',
-        'delete' => 'Delete',
-        'logout' => 'Logout',
-        'products' => 'Products',
-        'browse' => 'Browse',
-        'save' => 'Save'
-    ];
-    return $translations[$label];
+    require_once './translations.php';
+    return translations[$label];
 }
+
+

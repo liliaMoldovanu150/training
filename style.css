@@ -4,12 +4,23 @@
     background-color: #f3f3f3;
     justify-content: space-around;
     flex-direction: column;
-    width: 400px;
+    width: 300px;
     padding: 15px;
 }
 .product-item {
     display: flex;
     margin-bottom: 15px;
+}
+
+.product-image {
+    width: 100px;
+    height: 100px;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .product-features {
@@ -23,6 +34,15 @@
 }
 
 .to-cart {
+    text-align: center;
+}
+
+.error {
+    color: red;
+}
+
+.total-price {
+    margin-bottom: 25px;
     text-align: center;
 }
 
