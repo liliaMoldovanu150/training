@@ -33,7 +33,7 @@ if (isset($_GET['id'])) {
         <br>
     <?php endforeach; ?>
 <?php else: ?>
-    <p>All products were added to cart.</p>
+    <p class="message">All products were added to cart.</p>
 <?php endif; ?>
 <a class="to-cart" href="./cart.php"><?= translate('go_to_cart'); ?></a>
 

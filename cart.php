@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
     <?php endforeach; ?>
     <div class="total-price">Total Price: <?= $totalPrice; ?></div>
 <?php else: ?>
-    <p><?= 'Your cart is empty.'; ?></p>
+    <p class="message">Your cart is empty.</p>
 <?php endif; ?>
 <form action="./cart.php" method="post">
     <input

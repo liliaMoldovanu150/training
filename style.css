@@ -37,6 +37,10 @@
     text-align: center;
 }
 
+.message {
+    text-align: center;
+}
+
 .error {
     color: red;
 }
@@ -44,6 +48,14 @@
 .total-price {
     margin-bottom: 25px;
     text-align: center;
+}
+
+form {
+    margin: auto;
+}
+
+p.error {
+    margin-bottom: 0px;
 }
 
 
