@@ -111,7 +111,7 @@ function translate($label): string
     return translations[$label];
 }
 
-function deleteItem()
+function deleteItemFromDB()
 {
     try {
         $sql = 'DELETE FROM products WHERE id=?;';
@@ -122,5 +122,95 @@ function deleteItem()
         throw $e;
     }
 }
+
+function uploadImage()
+{
+    try {
+//        if (
+//            !isset($_FILES['image']['error']) ||
+//            is_array($_FILES['image']['error'])
+//        ) {
+//            throw new RuntimeException('Invalid parameters.');
+//        }
+
+        switch ($_FILES['image']['error']) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                throw new RuntimeException('No file sent.');
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                throw new RuntimeException('Exceeded filesize limit.');
+            default:
+                throw new RuntimeException('Unknown errors.');
+        }
+
+        if ($_FILES['image']['size'] > 1000000) {
+            throw new RuntimeException('Exceeded filesize limit.');
+        }
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+
+        if (false === $ext = array_search(
+                $finfo->file($_FILES['image']['tmp_name']),
+                array(
+                    'jpg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'gif' => 'image/gif',
+                ),
+                true
+            )) {
+            throw new RuntimeException('Invalid file format.');
+        }
+
+        if (!move_uploaded_file(
+            $_FILES['image']['tmp_name'],
+            sprintf('./images/%s.%s',
+                sha1_file($_FILES['image']['tmp_name']),
+                $ext
+            )
+        )) {
+            throw new RuntimeException('Failed to move uploaded file.');
+        }
+
+        return true;
+
+    } catch (RuntimeException $e) {
+        throw $e;
+    }
+}
+
+function addItemToDB($title, $description, $price, $imageUrl)
+{
+    try {
+        $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $title, PDO::PARAM_STR, 20);
+        $stmt->bindParam(2, $description, PDO::PARAM_STR, 250);
+        $stmt->bindParam(3, $price, PDO::PARAM_INT);
+        $stmt->bindParam(4, $imageUrl, PDO::PARAM_STR, 100);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+function updateItem($title, $description, $price, $imageUrl)
+{
+    try {
+        $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE id='
+            . $_SESSION['editProductId']
+            . ';';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $title, PDO::PARAM_STR, 20);
+        $stmt->bindParam(2, $description, PDO::PARAM_STR, 250);
+        $stmt->bindParam(3, $price, PDO::PARAM_INT);
+        $stmt->bindParam(4, $imageUrl, PDO::PARAM_STR, 100);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
 
 

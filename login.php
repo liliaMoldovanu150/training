@@ -22,8 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$usernameErr && !$passwordErr) {
     if ($username === adminUsername && password_verify($password, adminPassword)) {
-        header('Location: ./products.php');
         $_SESSION['login_user'] = $username;
+        header('Location: ./products.php');
     } else {
         $errorMessage = 'Invalid username and/or password';
     }

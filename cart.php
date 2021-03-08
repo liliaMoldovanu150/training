@@ -132,6 +132,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
     <br><br>
     <input type="submit" value="<?= translate('checkout'); ?>">
 </form>
-<a href="index.php"><?= translate('go_to_index'); ?></a>
+<a href="./index.php"><?= translate('go_to_index'); ?></a>
 
 <?php require_once './view/footer.view.php'; ?>

@@ -11,7 +11,7 @@ if (!isset($_SESSION['login_user'])) {
 }
 
 if (isset($_GET['id'])) {
-    deleteItem();
+    deleteItemFromDB();
     if (array_search($_GET['id'], $_SESSION['id']) >= 0) {
         removeItemFromCart();
     }
@@ -42,7 +42,7 @@ $allProducts = getAllProducts();
     <?php endforeach; ?>
 <?php endif; ?>
 <div class="actions">
-    <a href="./product.php"><?= translate('add'); ?></a>
+    <a href="./product.php?action=add"><?= translate('add'); ?></a>
     <a href="./products.php?action=logout"><?= translate('logout'); ?></a>
 </div>
 
