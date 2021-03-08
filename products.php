@@ -2,6 +2,22 @@
 
 require_once './common.php';
 
+if (isset($_GET['action']) == 'logout') {
+    unset($_SESSION['login_user']);
+}
+
+if (!isset($_SESSION['login_user'])) {
+    header('Location: ./index.php');
+}
+
+if (isset($_GET['id'])) {
+    deleteItem();
+    if (array_search($_GET['id'], $_SESSION['id']) >= 0) {
+        removeItemFromCart();
+    }
+    header('Location: ./products.php');
+}
+
 $allProducts = getAllProducts();
 
 ?>
@@ -19,13 +35,15 @@ $allProducts = getAllProducts();
                 <div><?= $product['description']; ?></div>
                 <div><?= $product['price']; ?></div>
             </div>
-            <a href="./product.php?id=<?= $product['id']; ?>"><?= translate('edit'); ?></a>
-            <a href="./index.php?id=<?= $product['id']; ?>"><?= translate('delete'); ?></a>
+            <a class="edit" href="./product.php?id=<?= $product['id']; ?>"><?= translate('edit'); ?></a>
+            <a href="./products.php?id=<?= $product['id']; ?>"><?= translate('delete'); ?></a>
         </div>
         <br>
     <?php endforeach; ?>
 <?php endif; ?>
-<a href="./product.php"><?= translate('add'); ?></a>
-<a href="./products.php"><?= translate('logout'); ?></a>
+<div class="actions">
+    <a href="./product.php"><?= translate('add'); ?></a>
+    <a href="./products.php?action=logout"><?= translate('logout'); ?></a>
+</div>
 
 <?php require_once './view/footer.view.php'; ?>

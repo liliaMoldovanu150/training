@@ -21,14 +21,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$usernameErr && !$passwordErr) {
-    if ($username === adminUsername && $password === adminPassword) {
+    if ($username === adminUsername && password_verify($password, adminPassword)) {
         header('Location: ./products.php');
+        $_SESSION['login_user'] = $username;
     } else {
         $errorMessage = 'Invalid username and/or password';
     }
 }
-
-$_SESSION['login_user'] = $username;
 
 ?>
 
@@ -39,6 +38,7 @@ $_SESSION['login_user'] = $username;
                 type="text"
                 name="username"
                 placeholder="Username"
+                value="<?= $_POST["username"] ?? ''; ?>"
         >
         <br>
         <span class="error"><?= $usernameErr; ?></span>
@@ -47,6 +47,7 @@ $_SESSION['login_user'] = $username;
                 type="text"
                 name="password"
                 placeholder="Password"
+                value="<?= $_POST["password"] ?? ''; ?>"
         >
         <br>
         <span class="error"><?= $passwordErr; ?></span>

@@ -54,8 +54,13 @@ form {
     margin: auto;
 }
 
-p.error {
-    margin-bottom: 0px;
+.edit {
+    margin-right: 15px;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-around;
 }
 
 

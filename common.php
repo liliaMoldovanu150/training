@@ -111,4 +111,16 @@ function translate($label): string
     return translations[$label];
 }
 
+function deleteItem()
+{
+    try {
+        $sql = 'DELETE FROM products WHERE id=?;';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $_GET['id'], PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
 
