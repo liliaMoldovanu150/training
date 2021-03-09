@@ -2,7 +2,7 @@
 
 require_once './common.php';
 
-if (isset($_GET['action']) == 'logout') {
+if (isset($_POST['action']) == 'logout') {
     unset($_SESSION['login_user']);
 }
 
@@ -58,7 +58,10 @@ $allProducts = getAllProducts();
     <form action="./product.php" method="post">
         <input type="submit" value="<?= translate('add'); ?>">
     </form>
-    <a href="./products.php?action=logout"><?= translate('logout'); ?></a>
+    <form action="./products.php" method="post">
+        <input type="hidden" name="action" value="logout">
+        <input type="submit" value="<?= translate('logout'); ?>">
+    </form>
 </div>
 
 <?php require_once './view/footer.view.php'; ?>
