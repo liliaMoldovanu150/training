@@ -2,11 +2,19 @@
 
 require_once './common.php';
 
-$cartProducts = getCartProducts();
+$cartProducts = getCartProducts($_SESSION['id']);
 
-if (isset($_GET['id'])) {
-    removeItemFromCart();
-    header('Location: ./cart.php');
+
+if (isset($_POST['id'])) {
+    if ($_POST['action'] == 'remove') {
+        removeItemFromCart();
+        header('Location: ./cart.php');
+    } elseif ($_POST['action'] == 'add') {
+        if (count(productExists($_POST['id']))) {
+            array_push($_SESSION['id'], $_POST['id']);
+        }
+        header('Location: ./index.php');
+    }
 }
 
 $nameErr = $detailsErr = "";
@@ -76,10 +84,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
     $headers = 'From: example@example.com' . "\r\n" .
         'Content-type: text/html; charset=iso-8859-1';
 
-    $email = mail(managerEmail, 'Order', $emailMessage, $headers);
+    $email = mail(MANAGER_EMAIL, 'Order', $emailMessage, $headers);
 
     if ($email) {
-        removeAllItemsFromCart();
+        $_SESSION['id'] = [];
         header('Location: ./index.php');
     }
 }
@@ -92,14 +100,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$nameErr && !$detailsErr) {
         <?php $totalPrice += $cartProduct['price']; ?>
         <div class="product-item">
             <div class="product-image">
-                <img src="./images/<?= $cartProduct['image_url']; ?>" alt="product-image">
+                <img src="./images/<?= $cartProduct['image_url']; ?>" alt="<?= translate('product_image'); ?>">
             </div>
             <div class="product-features">
                 <div><?= $cartProduct['title']; ?></div>
                 <div><?= $cartProduct['description']; ?></div>
                 <div><?= $cartProduct['price']; ?></div>
             </div>
-            <a href="./cart.php?id=<?= $cartProduct['id']; ?>"><?= translate('remove'); ?></a>
+            <form action="./cart.php" method="post">
+                <input type="hidden" name="id" value="<?= $cartProduct['id']; ?>">
+                <input type="hidden" name="action" value="remove">
+                <input type="submit" value="<?= translate('remove'); ?>">
+            </form>
         </div>
         <br>
     <?php endforeach; ?>

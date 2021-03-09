@@ -10,9 +10,16 @@ if (!isset($_SESSION['login_user'])) {
     header('Location: ./index.php');
 }
 
-if (isset($_GET['id'])) {
-    deleteItemFromDB();
-    if (array_search($_GET['id'], $_SESSION['id']) >= 0) {
+if (isset($_POST['id'])) {
+    try {
+        $sql = 'DELETE FROM products WHERE id=?;';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $_POST['id'], PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+    if (array_search($_POST['id'], $_SESSION['id']) >= 0) {
         removeItemFromCart();
     }
     header('Location: ./products.php');
@@ -28,21 +35,29 @@ $allProducts = getAllProducts();
     <?php foreach ($allProducts as $product): ?>
         <div class="product-item">
             <div class="product-image">
-                <img src="./images/<?= $product['image_url']; ?>" alt="product-image">
+                <img src="./images/<?= $product['image_url']; ?>" alt="<?= translate('product_image'); ?>">
             </div>
             <div class="product-features">
                 <div><?= $product['title']; ?></div>
                 <div><?= $product['description']; ?></div>
                 <div><?= $product['price']; ?></div>
             </div>
-            <a class="edit" href="./product.php?id=<?= $product['id']; ?>"><?= translate('edit'); ?></a>
-            <a href="./products.php?id=<?= $product['id']; ?>"><?= translate('delete'); ?></a>
+            <form action="./product.php" method="post">
+                <input type="hidden" name="id" value="<?= $product['id']; ?>">
+                <input type="submit" value="<?= translate('edit'); ?>">
+            </form>
+            <form action="./products.php" method="post">
+                <input type="hidden" name="id" value="<?= $product['id']; ?>">
+                <input type="submit" value="<?= translate('delete'); ?>">
+            </form>
         </div>
         <br>
     <?php endforeach; ?>
 <?php endif; ?>
 <div class="actions">
-    <a href="./product.php?action=add"><?= translate('add'); ?></a>
+    <form action="./product.php" method="post">
+        <input type="submit" value="<?= translate('add'); ?>">
+    </form>
     <a href="./products.php?action=logout"><?= translate('logout'); ?></a>
 </div>
 

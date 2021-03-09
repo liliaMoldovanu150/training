@@ -6,15 +6,15 @@ if (!isset($_SESSION['login_user'])) {
     header('Location: ./index.php');
 }
 
-if (isset($_GET['id'])) {
-    $_SESSION['editProductId'] = $_GET['id'];
-    $editProduct = productExists($_GET['id'])[0];
+if (isset($_POST['id'])) {
+    $_SESSION['editProductId'] = $_POST['id'];
+    $editProduct = productExists($_POST['id'])[0];
 }
 
 $titleErr = $descriptionErr = $priceErr = "";
 $title = $description = $price = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['title'])) {
     if (empty($_POST["title"])) {
         $titleErr = "Title is required";
     } else {
@@ -34,26 +34,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-if (count($_POST) && !empty($_FILES['image']['name']) && !isset($_SESSION['editProductId'])) {
+if (isset($_POST['title']) && !empty($_FILES['image']['name']) && !isset($_SESSION['editProductId'])) {
     $imageUrl = sha1_file($_FILES['image']['tmp_name'])
         . '.'
         . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
     if (uploadImage() && !$titleErr && !$descriptionErr && !$priceErr) {
-        addItemToDB($title, $description, $price, $imageUrl);
+        $queryValues = [$title, $description, $price, $imageUrl];
+        try {
+            $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
+            $stmt = connection()->prepare($sql);
+            $stmt->execute($queryValues);
+        } catch (PDOException $e) {
+            throw $e;
+        }
         header('Location: ./products.php');
     }
 }
 
 
-if (count($_POST) && isset($_SESSION['editProductId']) && !$titleErr && !$descriptionErr && !$priceErr) {
+if (isset($_POST['title']) && isset($_SESSION['editProductId']) && !$titleErr && !$descriptionErr && !$priceErr) {
     if (empty($_FILES['image']['name'])) {
-        updateItemExceptImage($title, $description, $price);
+        $queryValues = [$title, $description, $price];
+        try {
+            $sql = 'UPDATE products SET title=?, description=?, price=? WHERE id='
+                . $_SESSION['editProductId']
+                . ';';
+            $stmt = connection()->prepare($sql);
+            $stmt->execute($queryValues);
+        } catch (PDOException $e) {
+            throw $e;
+        }
     } elseif (!empty($_FILES['image']['name'])) {
         $imageUrl = sha1_file($_FILES['image']['tmp_name'])
             . '.'
             . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         if (uploadImage()) {
-            updateItemIncludingImage($title, $description, $price, $imageUrl);
+            $queryValues = [$title, $description, $price, $imageUrl];
+            try {
+                $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE id='
+                    . $_SESSION['editProductId']
+                    . ';';
+                $stmt = connection()->prepare($sql);
+                $stmt->execute($queryValues);
+            } catch (PDOException $e) {
+                throw $e;
+            }
         }
     }
     unset($_SESSION['editProductId']);
@@ -65,6 +90,7 @@ if (count($_POST) && isset($_SESSION['editProductId']) && !$titleErr && !$descri
 <?php require_once './view/header.view.php'; ?>
 
 <form action="./product.php" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="submit" value="submit">
     <input
             type="text"
             name="title"

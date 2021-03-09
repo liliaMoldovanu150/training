@@ -1,6 +1,6 @@
 <?php
 
-define('translations', [
+define('TRANSLATIONS', [
     'go_to_cart' => 'Go to cart',
     'add' => 'Add',
     'remove' => 'Remove',
@@ -12,5 +12,6 @@ define('translations', [
     'logout' => 'Logout',
     'products' => 'Products',
     'browse' => 'Browse',
-    'save' => 'Save'
+    'save' => 'Save',
+    'product_image' => 'Product Image'
 ]);
