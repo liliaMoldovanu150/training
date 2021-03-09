@@ -2,6 +2,10 @@
 
 require_once './common.php';
 
+if (!isset($_SESSION['login_user'])) {
+    header('Location: ./index.php');
+}
+
 if (isset($_GET['id'])) {
     $_SESSION['editProductId'] = $_GET['id'];
     $editProduct = productExists($_GET['id'])[0];
@@ -54,7 +58,6 @@ if (count($_POST) && isset($_SESSION['editProductId']) && !$titleErr && !$descri
     }
     unset($_SESSION['editProductId']);
     header('Location: ./products.php');
-
 }
 
 ?>
