@@ -126,12 +126,12 @@ function deleteItemFromDB()
 function uploadImage()
 {
     try {
-//        if (
-//            !isset($_FILES['image']['error']) ||
-//            is_array($_FILES['image']['error'])
-//        ) {
-//            throw new RuntimeException('Invalid parameters.');
-//        }
+        if (
+            !isset($_FILES['image']['error']) ||
+            is_array($_FILES['image']['error'])
+        ) {
+            throw new RuntimeException('Invalid parameters.');
+        }
 
         switch ($_FILES['image']['error']) {
             case UPLOAD_ERR_OK:
@@ -195,7 +195,7 @@ function addItemToDB($title, $description, $price, $imageUrl)
     }
 }
 
-function updateItem($title, $description, $price, $imageUrl)
+function updateItemIncludingImage($title, $description, $price, $imageUrl)
 {
     try {
         $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE id='
@@ -206,6 +206,22 @@ function updateItem($title, $description, $price, $imageUrl)
         $stmt->bindParam(2, $description, PDO::PARAM_STR, 250);
         $stmt->bindParam(3, $price, PDO::PARAM_INT);
         $stmt->bindParam(4, $imageUrl, PDO::PARAM_STR, 100);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+function updateItemExceptImage($title, $description, $price)
+{
+    try {
+        $sql = 'UPDATE products SET title=?, description=?, price=? WHERE id='
+            . $_SESSION['editProductId']
+            . ';';
+        $stmt = connection()->prepare($sql);
+        $stmt->bindParam(1, $title, PDO::PARAM_STR, 20);
+        $stmt->bindParam(2, $description, PDO::PARAM_STR, 250);
+        $stmt->bindParam(3, $price, PDO::PARAM_INT);
         $stmt->execute();
     } catch (PDOException $e) {
         throw $e;

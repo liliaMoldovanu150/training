@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-if (isset($_POST) && isset($_FILES['image']) && !isset($_SESSION['editProductId'])) {
+if (count($_POST) && !empty($_FILES['image']['name']) && !isset($_SESSION['editProductId'])) {
     $imageUrl = sha1_file($_FILES['image']['tmp_name'])
         . '.'
         . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
@@ -41,15 +41,19 @@ if (isset($_POST) && isset($_FILES['image']) && !isset($_SESSION['editProductId'
 }
 
 
-if (isset($_POST) && isset($_SESSION['editProductId']) && !$titleErr && !$descriptionErr && !$priceErr) {
-    if (isset($_FILES['image']) && uploadImage()) {
+if (count($_POST) && isset($_SESSION['editProductId']) && !$titleErr && !$descriptionErr && !$priceErr) {
+    if (empty($_FILES['image']['name'])) {
+        updateItemExceptImage($title, $description, $price);
+    } elseif (!empty($_FILES['image']['name'])) {
         $imageUrl = sha1_file($_FILES['image']['tmp_name'])
             . '.'
             . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        updateItem($title, $description, $price, $imageUrl);
+        if (uploadImage()) {
+            updateItemIncludingImage($title, $description, $price, $imageUrl);
+        }
     }
     unset($_SESSION['editProductId']);
-//        header('Location: ./products.php');
+    header('Location: ./products.php');
 
 }
 
