@@ -51,14 +51,11 @@ if (isset($_POST['title']) && !empty($_FILES['image']['name']) && !isset($_SESSI
     }
 }
 
-
 if (isset($_POST['title']) && isset($_SESSION['editProductId']) && !$titleErr && !$descriptionErr && !$priceErr) {
     if (empty($_FILES['image']['name'])) {
         $queryValues = [$title, $description, $price];
         try {
-            $sql = 'UPDATE products SET title=?, description=?, price=? WHERE id='
-                . $_SESSION['editProductId']
-                . ';';
+            $sql = 'UPDATE products SET title=?, description=?, price=? WHERE id=' . $_SESSION['editProductId'] . ';';
             $stmt = connection()->prepare($sql);
             $stmt->execute($queryValues);
         } catch (PDOException $e) {
@@ -89,42 +86,42 @@ if (isset($_POST['title']) && isset($_SESSION['editProductId']) && !$titleErr &&
 
 <?php require_once './view/header.view.php'; ?>
 
-<form action="./product.php" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="submit" value="submit">
-    <input
-            type="text"
-            name="title"
-            value="<?= $editProduct['title'] ?? ''; ?>"
-            placeholder="Title"
-    >
-    <span class="error"><?= $titleErr; ?></span>
-    <br><br>
-    <input
-            type="text"
-            name="description"
-            value="<?= $editProduct['description'] ?? ''; ?>"
-            placeholder="Description"
-    >
-    <span class="error"><?= $descriptionErr; ?></span>
-    <br><br>
-    <input
-            type="number"
-            name="price"
-            min="0.00"
-            step="0.01"
-            value="<?= $editProduct['price'] ?? ''; ?>"
-            placeholder="Price"
-    >
-    <span class="error"><?= $priceErr; ?></span>
-    <br><br>
-    <input
-            type="file"
-            name="image"
-            placeholder="Image"
-    >
-    <br><br>
-    <input type="submit" value="<?= translate('save'); ?>">
-</form>
-<a href="./products.php"><?= translate('products'); ?></a>
+<div class="content-wrapper">
+    <form action="./product.php" method="post" enctype="multipart/form-data">
+        <input
+                type="text"
+                name="title"
+                value="<?= $editProduct['title'] ?? ''; ?>"
+                placeholder="Title"
+        >
+        <span class="error"><?= $titleErr; ?></span>
+        <br><br>
+        <input
+                type="text"
+                name="description"
+                value="<?= $editProduct['description'] ?? ''; ?>"
+                placeholder="Description"
+        >
+        <span class="error"><?= $descriptionErr; ?></span>
+        <br><br>
+        <input
+                type="number"
+                name="price"
+                min="0.00"
+                step="0.01"
+                value="<?= $editProduct['price'] ?? ''; ?>"
+                placeholder="Price"
+        >
+        <span class="error"><?= $priceErr; ?></span>
+        <br><br>
+        <input
+                type="file"
+                name="image"
+        >
+        <br><br>
+        <input type="submit" value="<?= translate('save'); ?>">
+    </form>
+    <a class="go" href="./products.php"><?= translate('products'); ?></a>
+</div>
 
 <?php require_once './view/footer.view.php'; ?>

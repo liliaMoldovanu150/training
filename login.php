@@ -33,29 +33,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$usernameErr && !$passwordErr) {
 
 <?php require_once './view/header.view.php'; ?>
 
-    <form action="./login.php" method="post">
-        <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value="<?= $_POST["username"] ?? ''; ?>"
-        >
-        <br>
-        <span class="error"><?= $usernameErr; ?></span>
-        <br><br>
-        <input
-                type="text"
-                name="password"
-                placeholder="Password"
-                value="<?= $_POST["password"] ?? ''; ?>"
-        >
-        <br>
-        <span class="error"><?= $passwordErr; ?></span>
-        <?php if ($errorMessage): ?>
-            <p class="error"><?= $errorMessage; ?></p>
-        <?php endif; ?>
-        <br><br>
-        <input type="submit" value="<?= translate('login'); ?>">
-    </form>
+    <div class="content-wrapper">
+        <form action="./login.php" method="post">
+            <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value="<?= $_POST["username"] ?? ''; ?>"
+            >
+            <br>
+            <span class="error"><?= $usernameErr; ?></span>
+            <br><br>
+            <input
+                    type="text"
+                    name="password"
+                    placeholder="Password"
+                    value="<?= $_POST["password"] ?? ''; ?>"
+            >
+            <br>
+            <span class="error"><?= $passwordErr; ?></span>
+            <?php if ($errorMessage): ?>
+                <p class="error"><?= $errorMessage; ?></p>
+            <?php endif; ?>
+            <br><br>
+            <input type="submit" value="<?= translate('login'); ?>">
+        </form>
+    </div>
 
 <?php require_once './view/footer.view.php'; ?>

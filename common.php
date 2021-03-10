@@ -64,7 +64,7 @@ function getCartProducts($cartIds): array
 
 function removeItemFromCart(): array
 {
-    $key = array_search($_GET['id'], $_SESSION['id']);
+    $key = array_search($_POST['id'], $_SESSION['id']);
     unset($_SESSION['id'][$key]);
     $_SESSION['id'] = array_values($_SESSION['id']);
     return $_SESSION['id'];

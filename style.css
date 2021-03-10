@@ -1,4 +1,8 @@
 .container {
+    box-sizing: border-box;
+}
+
+.content-wrapper {
     display: flex;
     border: 2px solid gray;
     background-color: #f3f3f3;
@@ -7,6 +11,7 @@
     width: 300px;
     padding: 15px;
 }
+
 .product-item {
     display: flex;
     margin-bottom: 15px;
@@ -30,10 +35,14 @@
 }
 
 .product-features div {
-     padding: 5px 0;
+    padding: 5px 0;
 }
 
-.to-cart {
+.product-features div:first-child {
+    font-weight: bold;
+}
+
+.go {
     text-align: center;
 }
 
@@ -54,6 +63,10 @@ form {
     margin: auto;
 }
 
+.cart-form {
+    margin-bottom: 20px;
+}
+
 .edit {
     margin-right: 15px;
 }
@@ -63,5 +76,37 @@ form {
     justify-content: space-around;
 }
 
+.orders-wrapper {
+    width: 600px;
+    border: 2px solid gray;
+    background-color: #f3f3f3;
+}
+
+.order-heading {
+    text-align: center;
+}
+
+.order {
+    display: flex;
+    padding: 10px;
+}
+
+.order-details {
+    padding: 15px;
+    width: 50%;
+}
+
+.order-details div {
+    padding: 10px;
+}
+
+.order-products {
+    width: 50%;
+}
+
+.order-image {
+    width: 40px;
+    height: 40px;
+}
 
 
