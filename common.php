@@ -10,13 +10,9 @@ if (!isset($_SESSION['id'])) {
 
 function connection()
 {
-    try {
-        $pdo = new PDO('mysql:host=' . SERV_NAME . ';dbname=' . DBNAME, USERNAME, PASSWORD);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
-    } catch (PDOException $e) {
-        throw $e;
-    }
+    $pdo = new PDO('mysql:host=' . SERV_NAME . ';dbname=' . DBNAME, USERNAME, PASSWORD);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    return $pdo;
 }
 
 function getAllProducts(): array
@@ -27,26 +23,12 @@ function getAllProducts(): array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function productExists($productId): array
+function getSingleProduct($productId): array
 {
     $sql = 'SELECT * FROM products WHERE id=?;';
     $stmt = connection()->prepare($sql);
-    $stmt->bindParam(1, $productId, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function getCartProducts($cartIds): array
-{
-    if (!count($cartIds)) {
-        return [];
-    }
-
-    $inQuery = implode(',', array_fill(0, count($cartIds), '?'));
-    $sql = 'SELECT * FROM products WHERE id IN (' . $inQuery . ');';
-    $stmt = connection()->prepare($sql);
-    $stmt->execute($cartIds);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->execute([$productId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 function removeItemFromCart(): array

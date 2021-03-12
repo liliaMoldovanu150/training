@@ -11,14 +11,11 @@ if (!isset($_SESSION['login_user'])) {
 }
 
 if (isset($_POST['id'])) {
-    try {
-        $sql = 'DELETE FROM products WHERE id=?;';
-        $stmt = connection()->prepare($sql);
-        $stmt->bindParam(1, $_POST['id'], PDO::PARAM_INT);
-        $stmt->execute();
-    } catch (PDOException $e) {
-        throw $e;
-    }
+    $sql = 'DELETE FROM products WHERE id=?;';
+    $stmt = connection()->prepare($sql);
+    $stmt->bindParam(1, $_POST['id'], PDO::PARAM_INT);
+    $stmt->execute();
+
     if (array_search($_POST['id'], $_SESSION['id']) >= 0) {
         removeItemFromCart();
     }
@@ -39,8 +36,8 @@ $allProducts = getAllProducts();
                     <img src="./images/<?= $product['image_url']; ?>" alt="<?= translate('product_image'); ?>">
                 </div>
                 <div class="product-features">
-                    <div><?= ucfirst($product['title']); ?></div>
-                    <div><?= ucfirst($product['description']); ?></div>
+                    <div><?= $product['title']; ?></div>
+                    <div><?= $product['description']; ?></div>
                     <div><?= $product['price']; ?></div>
                 </div>
                 <form action="./product.php" method="post">

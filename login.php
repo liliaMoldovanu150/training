@@ -2,30 +2,34 @@
 
 require_once './common.php';
 
-$username = $usernameErr = '';
-$password = $passwordErr = '';
-$errorMessage = '';
+$validation = [
+    'username' => '',
+    'password' => '',
+    'usernameErr' => '',
+    'passwordErr' => '',
+    'errorMessage' => '',
+];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (empty($_POST["username"])) {
-        $usernameErr = "Enter your username";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (empty($_POST['username'])) {
+        $validation['usernameErr'] = translate('enter_username');
     } else {
-        $username = strip_tags($_POST["username"]);
+        $validation['username'] = strip_tags($_POST['username']);
     }
 
-    if (empty($_POST["password"])) {
-        $passwordErr = 'Enter your password';
+    if (empty($_POST['password'])) {
+        $validation['passwordErr'] = translate('enter_password');
     } else {
-        $password = strip_tags($_POST["password"]);
+        $validation['password'] = strip_tags($_POST['password']);
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && !$usernameErr && !$passwordErr) {
-    if ($username === ADMIN_USERNAME && password_verify($password, ADMIN_PASSWORD)) {
-        $_SESSION['login_user'] = $username;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$validation['usernameErr'] && !$validation['passwordErr']) {
+    if ($validation['username'] === ADMIN_USERNAME && password_verify($validation['password'], ADMIN_PASSWORD)) {
+        $_SESSION['login_user'] = $validation['username'];
         header('Location: ./products.php');
     } else {
-        $errorMessage = 'Invalid username and/or password';
+        $validation['errorMessage'] = translate('invalid');
     }
 }
 
@@ -38,22 +42,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$usernameErr && !$passwordErr) {
             <input
                     type="text"
                     name="username"
-                    placeholder="Username"
-                    value="<?= $_POST["username"] ?? ''; ?>"
+                    placeholder="<?= translate('username'); ?>"
+                    value="<?= $_POST['username'] ?? ''; ?>"
             >
             <br>
-            <span class="error"><?= $usernameErr; ?></span>
+            <span class="error"><?= $validation['usernameErr']; ?></span>
             <br><br>
             <input
                     type="text"
                     name="password"
-                    placeholder="Password"
-                    value="<?= $_POST["password"] ?? ''; ?>"
+                    placeholder="<?= translate('password'); ?>"
+                    value="<?= $_POST['password'] ?? ''; ?>"
             >
             <br>
-            <span class="error"><?= $passwordErr; ?></span>
-            <?php if ($errorMessage): ?>
-                <p class="error"><?= $errorMessage; ?></p>
+            <span class="error"><?= $validation['passwordErr']; ?></span>
+            <?php if ($validation['errorMessage']): ?>
+                <p class="error"><?= $validation['errorMessage']; ?></p>
             <?php endif; ?>
             <br><br>
             <input type="submit" value="<?= translate('login'); ?>">

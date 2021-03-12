@@ -2,41 +2,50 @@
 
 require_once './common.php';
 
-if (isset($_POST['id'])) {
-    if ($_POST['action'] == 'remove') {
-        removeItemFromCart();
-    } elseif ($_POST['action'] == 'add') {
-        if (count(productExists($_POST['id']))) {
-            array_push($_SESSION['id'], $_POST['id']);
-        }
+if (isset($_POST['id']) && $_POST['action'] === 'remove') {
+    removeItemFromCart();
+}
+
+if (isset($_POST['id']) && $_POST['action'] === 'add') {
+    if (count(getSingleProduct($_POST['id']))) {
+        array_push($_SESSION['id'], $_POST['id']);
         header('Location: ./index.php');
     }
 }
 
-$cartProducts = getCartProducts($_SESSION['id']);
-$nameErr = $detailsErr = "";
-$name = $details = $comment = "";
+if (!count($_SESSION['id'])) {
+    $cartProducts = [];
+} else {
+    $inQuery = implode(',', array_fill(0, count($_SESSION['id']), '?'));
+    $sql = 'SELECT * FROM products WHERE id IN (' . $inQuery . ');';
+    $stmt = connection()->prepare($sql);
+    $stmt->execute($_SESSION['id']);
+    $cartProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'checkout') {
-    if (empty($_POST["name"])) {
-        $nameErr = "Name is required";
+$validation = [
+    'name' => '',
+    'details' => '',
+    'comment' => '',
+    'nameErr' => '',
+    'detailsErr' => ''
+];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout') {
+    if (empty($_POST['name'])) {
+        $validation['nameErr'] = translate('name_required');
     } else {
-        $name = strip_tags($_POST["name"]);
-        if (!preg_match("/^[a-zA-Z-' ]*$/", $name)) {
-            $nameErr = "Only letters and white space allowed";
-        }
+        $validation['name'] = strip_tags($_POST['name']);
     }
 
-    if (empty($_POST["details"])) {
-        $detailsErr = "Contact details are required";
+    if (empty($_POST['details'])) {
+        $validation['detailsErr'] = translate('details_required');
     } else {
-        $details = strip_tags($_POST["details"]);
+        $validation['details'] = strip_tags($_POST['details']);
     }
 
-    if (empty($_POST["comment"])) {
-        $comment = "";
-    } else {
-        $comment = strip_tags($_POST["comment"]);
+    if (!empty($_POST['comment'])) {
+        $validation['comment'] = strip_tags($_POST['comment']);
     }
 }
 
@@ -44,73 +53,62 @@ $totalPrice = 0;
 $email = null;
 $prices = [];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'checkout' && !$nameErr && !$detailsErr) {
-    ob_start(); ?>
-    <html lang="en">
-    <head>
-        <title>Order</title>
-    </head>
-    <body>
-    <p>Customer Name: <?= $name; ?></p>
-    <p>Contact details: <?= $details; ?></p>
-    <p>Comments: <?= $comment; ?></p>
-    <?php if (count($cartProducts)): ?>
-        <?php foreach ($cartProducts as $cartProduct): ?>
-            <?php $totalPrice += $cartProduct['price']; ?>
-            <div class="product-item">
-                <div class="product-image">
-                    <img
-                            src="<?= $_SERVER['HTTP_ORIGIN'] . '/images/' . $cartProduct['image_url']; ?>"
-                            alt="product-image"
-                    >
-                </div>
-                <div class="product-features">
-                    <div><?= $cartProduct['title']; ?></div>
-                    <div><?= $cartProduct['description']; ?></div>
-                    <div><?= $cartProduct['price']; ?></div>
-                </div>
-            </div>
-            <br>
-        <?php endforeach; ?>
-        <div class="total-price">Total Price: <?= $totalPrice; ?></div>
-    <?php endif; ?>
-    </body>
-    </html>
-    <?php $emailMessage = ob_get_contents();
-    ob_end_clean();
-
-    $headers = 'From: example@example.com' . "\r\n" .
-        'Content-type: text/html; charset=iso-8859-1';
-    $email = mail(MANAGER_EMAIL, 'Order', $emailMessage, $headers);
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && $_POST['action'] === 'checkout'
+    && !$validation['nameErr']
+    && !$validation['detailsErr']
+) {
+    $number = 0;
     $orderTotal = 0;
+
+    $message = '<html><body>';
+    $message .= '<table>';
+    $message .= '<tr><td colspan="5">' . translate('customer_name') . ': ' . $validation['name'] . '</td></tr>';
+    $message .= '<tr><td colspan="5">'
+        . translate('contact_details') . ': '
+        . $validation['details'] . '</td></tr>';
+    $message .= '<tr><td colspan="5">' . translate('comments') . ': ' . $validation['comment'] . '</td></tr>';
 
     foreach ($cartProducts as $cartProduct) {
         $prices[$cartProduct['id']] = $cartProduct['price'];
         $orderTotal += $cartProduct['price'];
+        $message .= '<tr><td>' . ++$number . '</td>';
+        $message .= '<td><img src="' . $_SERVER['HTTP_ORIGIN'] . '/images/' . $cartProduct['image_url'] . '" ';
+        $message .= 'alt="' . translate('product_image') . '"></td>';
+        $message .= '<td>' . $cartProduct['title'] . '</td>';
+        $message .= '<td>' . $cartProduct['description'] . '</td>';
+        $message .= '<td>' . $cartProduct['price'] . '</td>';
+        $message .= '</tr>';
     }
 
-    if ($email) {
-        $purchasedProducts = implode(',', $_SESSION['id']);
-        $customerDetails = 'Name: ' . $name . '; Contact details: ' . $details . '; Comments: ' . $comment;
-        $productsPrices = json_encode($prices);
-        $queryValues = [date('Y:m:d'), $customerDetails, $purchasedProducts, $productsPrices, $orderTotal];
-        try {
-            $sql = 'INSERT INTO orders
+    $message .= '<tr><td colspan="5">' . translate('total_price') . ': ' . $orderTotal . '</td></tr>';
+    $message .= '</table>';
+    $message .= '</body></html>';
+
+    $headers = [
+        'From' => 'example@example.com',
+        'Content-type' => 'text/html; charset=iso-8859-1'
+    ];
+
+    $email = mail(MANAGER_EMAIL, translate('order'), $message, $headers);
+
+    $purchasedProducts = implode(',', $_SESSION['id']);
+    $customerDetails = translate('name') . ': ' . $validation['name'] . '; '
+        . translate('contact_details') . ': ' . $validation['details'] . '; '
+        . translate('comments') . ': ' . $validation['comment'];
+    $productsPrices = json_encode($prices);
+    $queryValues = [date('Y:m:d'), $customerDetails, $purchasedProducts, $productsPrices, $orderTotal];
+    $sql = 'INSERT INTO orders
                     (creation_date,
                     customer_details,
                     purchased_products,
                     products_prices,
                     total_price)
                     VALUES (?, ?, ?, ?, ?);';
-            $stmt = connection()->prepare($sql);
-            $stmt->execute($queryValues);
-        } catch (PDOException $e) {
-            throw $e;
-        }
-        $_SESSION['id'] = [];
-        header('Location: ./index.php');
-    }
+    $stmt = connection()->prepare($sql);
+    $stmt->execute($queryValues);
+    $_SESSION['id'] = [];
+    header('Location: ./index.php');
 }
 
 ?>
@@ -126,8 +124,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'checkout' && !$
                     <img src="./images/<?= $cartProduct['image_url']; ?>" alt="<?= translate('product_image'); ?>">
                 </div>
                 <div class="product-features">
-                    <div><?= ucfirst($cartProduct['title']); ?></div>
-                    <div><?= ucfirst($cartProduct['description']); ?></div>
+                    <div><?= $cartProduct['title']; ?></div>
+                    <div><?= $cartProduct['description']; ?></div>
                     <div><?= $cartProduct['price']; ?></div>
                 </div>
                 <form action="./cart.php" method="post">
@@ -138,9 +136,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'checkout' && !$
             </div>
             <br>
         <?php endforeach; ?>
-        <div class="total-price">Total Price: <?= $totalPrice; ?></div>
+        <div class="total-price"><?= translate('total_price') . ': ' . $totalPrice; ?></div>
     <?php else: ?>
-        <p class="message">Your cart is empty.</p>
+        <p class="message"><?= translate('empty_cart'); ?></p>
     <?php endif; ?>
     <form class="cart-form" action="./cart.php" method="post">
         <input type="hidden" name="action" value="checkout">
@@ -148,23 +146,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'checkout' && !$
                 type="text"
                 name="name"
                 value="<?= isset($_POST['name']) && !$email ? $_POST['name'] : ''; ?>"
-                placeholder="Name"
+                placeholder="<?= translate('name'); ?>"
         >
-        <span class="error"><?= $nameErr; ?></span>
+        <span class="error"><?= $validation['nameErr']; ?></span>
         <br><br>
         <input
                 type="text"
                 name="details"
                 value="<?= isset($_POST['details']) && !$email ? $_POST['details'] : ''; ?>"
-                placeholder="Contact details"
+                placeholder="<?= translate('contact_details'); ?>"
         >
-        <span class="error"><?= $detailsErr; ?></span>
+        <span class="error"><?= $validation['detailsErr']; ?></span>
         <br><br>
         <textarea
                 rows="4"
                 name="comment"
-                placeholder="Comments"><?= isset($_POST['comment']) && !$email ? $_POST['comment'] : ''; ?>
-        </textarea>
+                placeholder="<?= translate('comments'); ?>"><?= isset($_POST['comment']) && !$email
+                ? $_POST['comment']
+                : ''; ?></textarea>
         <br><br>
         <input type="submit" value="<?= translate('checkout'); ?>">
     </form>
