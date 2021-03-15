@@ -11,13 +11,16 @@ if (isset($_POST['id'])) {
     $editProduct = getSingleProduct($_POST['id']);
 }
 
+$pdo = connection();
+
 $validation = [
     'title' => '',
     'description' => '',
     'price' => '',
     'titleErr' => '',
     'descriptionErr' => '',
-    'priceErr' => ''
+    'priceErr' => '',
+    'imageErr' => ''
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
@@ -40,38 +43,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
     }
 }
 
-if (isset($_POST['title']) && !empty($_FILES['image']['name']) && !isset($_SESSION['editProductId'])) {
+$isFormValid = !$validation['titleErr'] && !$validation['descriptionErr'] && !$validation['priceErr'];
+$isEditMode = isset($_POST['title']) && isset($_SESSION['editProductId']);
+$isAddMode = isset($_POST['title']) && !isset($_SESSION['editProductId']);
+
+$imageUrl = null;
+
+if (!empty($_FILES['image']['name'])) {
     $imageUrl = sha1_file($_FILES['image']['tmp_name'])
         . '.'
         . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    if (uploadImage() && !$validation['titleErr'] && !$validation['descriptionErr'] && !$validation['priceErr']) {
-        $queryValues = [$validation['title'], $validation['description'], $validation['price'], $imageUrl];
-        $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
-        $stmt = connection()->prepare($sql);
-        $stmt->execute($queryValues);
-        header('Location: ./products.php');
-    }
 }
 
-if (isset($_POST['title']) && isset($_SESSION['editProductId']) && !$validation['titleErr'] && !$validation['descriptionErr'] && !$validation['priceErr']) {
-    if (empty($_FILES['image']['name'])) {
-        $queryValues = [$validation['title'], $validation['description'], $validation['price']];
-        $sql = 'UPDATE products SET title=?, description=?, price=? WHERE id=' . $_SESSION['editProductId'] . ';';
-        $stmt = connection()->prepare($sql);
-        $stmt->execute($queryValues);
-    } elseif (!empty($_FILES['image']['name'])) {
-        $imageUrl = sha1_file($_FILES['image']['tmp_name'])
-            . '.'
-            . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        if (uploadImage()) {
-            $queryValues = [$validation['title'], $validation['description'], $validation['price'], $imageUrl];
-            $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE id='
-                . $_SESSION['editProductId']
-                . ';';
-            $stmt = connection()->prepare($sql);
-            $stmt->execute($queryValues);
-        }
-    }
+if ($isAddMode && !$imageUrl) {
+    $validation['imageErr'] = translate('image_required');
+}
+
+if ($isAddMode && $isFormValid && $imageUrl && uploadImage()) {
+    $queryValues = [$validation['title'], $validation['description'], $validation['price'], $imageUrl];
+    $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($queryValues);
+    header('Location: ./products.php');
+}
+
+if ($isEditMode && $isFormValid && !$imageUrl) {
+    $queryValues = [$validation['title'], $validation['description'], $validation['price']];
+    $sql = 'UPDATE products SET title=?, description=?, price=? WHERE product_id='
+        . $_SESSION['editProductId']
+        . ';';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($queryValues);
+    unset($_SESSION['editProductId']);
+    header('Location: ./products.php');
+}
+
+if ($isEditMode && $isFormValid && $imageUrl && uploadImage()) {
+    $queryValues = [$validation['title'], $validation['description'], $validation['price'], $imageUrl];
+    $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE product_id='
+        . $_SESSION['editProductId']
+        . ';';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($queryValues);
     unset($_SESSION['editProductId']);
     header('Location: ./products.php');
 }
@@ -112,6 +125,7 @@ if (isset($_POST['title']) && isset($_SESSION['editProductId']) && !$validation[
                 type="file"
                 name="image"
         >
+        <span class="error"><?= $validation['imageErr']; ?></span>
         <br><br>
         <input type="submit" value="<?= translate('save'); ?>">
     </form>

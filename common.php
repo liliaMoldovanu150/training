@@ -25,7 +25,7 @@ function getAllProducts(): array
 
 function getSingleProduct($productId): array
 {
-    $sql = 'SELECT * FROM products WHERE id=?;';
+    $sql = 'SELECT * FROM products WHERE product_id=?;';
     $stmt = connection()->prepare($sql);
     $stmt->execute([$productId]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -51,23 +51,23 @@ function uploadImage()
         !isset($_FILES['image']['error']) ||
         is_array($_FILES['image']['error'])
     ) {
-        throw new RuntimeException('Invalid parameters.');
+        throw new RuntimeException(translate('invalid_parameters'));
     }
 
     switch ($_FILES['image']['error']) {
         case UPLOAD_ERR_OK:
             break;
         case UPLOAD_ERR_NO_FILE:
-            throw new RuntimeException('No file sent.');
+            throw new RuntimeException(translate('no_file'));
         case UPLOAD_ERR_INI_SIZE:
         case UPLOAD_ERR_FORM_SIZE:
-            throw new RuntimeException('Exceeded filesize limit.');
+            throw new RuntimeException(translate('exceeded_limit'));
         default:
-            throw new RuntimeException('Unknown errors.');
+            throw new RuntimeException(translate('unknown_errors'));
     }
 
     if ($_FILES['image']['size'] > 1000000) {
-        throw new RuntimeException('Exceeded filesize limit.');
+        throw new RuntimeException(translate('exceeded_limit'));
     }
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -81,7 +81,7 @@ function uploadImage()
             ),
             true
         )) {
-        throw new RuntimeException('Invalid file format.');
+        throw new RuntimeException(translate('invalid_file_format'));
     }
 
     if (!move_uploaded_file(
@@ -91,7 +91,7 @@ function uploadImage()
             $ext
         )
     )) {
-        throw new RuntimeException('Failed to move uploaded file.');
+        throw new RuntimeException(translate('failed_to_move_file'));
     }
     return true;
 }

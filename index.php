@@ -7,7 +7,7 @@ if (!count($_SESSION['id'])) {
 } else {
     $cartIds = $_SESSION['id'];
     $inQuery = implode(',', array_fill(0, count($cartIds), '?'));
-    $sql = 'SELECT * FROM products WHERE id NOT IN (' . $inQuery . ');';
+    $sql = 'SELECT * FROM products WHERE product_id NOT IN (' . $inQuery . ');';
     $stmt = connection()->prepare($sql);
     $stmt->execute($cartIds);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -30,7 +30,7 @@ if (!count($_SESSION['id'])) {
                     <div><?= $product['price']; ?></div>
                 </div>
                 <form action="./cart.php" method="post">
-                    <input type="hidden" name="id" value="<?= $product['id']; ?>">
+                    <input type="hidden" name="id" value="<?= $product['product_id']; ?>">
                     <input type="hidden" name="action" value="add">
                     <input type="submit" value="<?= translate('add'); ?>">
                 </form>

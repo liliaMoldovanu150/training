@@ -11,10 +11,9 @@ if (!isset($_SESSION['login_user'])) {
 }
 
 if (isset($_POST['id'])) {
-    $sql = 'DELETE FROM products WHERE id=?;';
+    $sql = 'DELETE FROM products WHERE product_id=?;';
     $stmt = connection()->prepare($sql);
-    $stmt->bindParam(1, $_POST['id'], PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute([$_POST['id']]);
 
     if (array_search($_POST['id'], $_SESSION['id']) >= 0) {
         removeItemFromCart();
@@ -41,11 +40,11 @@ $allProducts = getAllProducts();
                     <div><?= $product['price']; ?></div>
                 </div>
                 <form action="./product.php" method="post">
-                    <input type="hidden" name="id" value="<?= $product['id']; ?>">
+                    <input type="hidden" name="id" value="<?= $product['product_id']; ?>">
                     <input type="submit" value="<?= translate('edit'); ?>">
                 </form>
                 <form action="./products.php" method="post">
-                    <input type="hidden" name="id" value="<?= $product['id']; ?>">
+                    <input type="hidden" name="id" value="<?= $product['product_id']; ?>">
                     <input type="submit" value="<?= translate('delete'); ?>">
                 </form>
             </div>

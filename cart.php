@@ -6,19 +6,19 @@ if (isset($_POST['id']) && $_POST['action'] === 'remove') {
     removeItemFromCart();
 }
 
-if (isset($_POST['id']) && $_POST['action'] === 'add') {
-    if (count(getSingleProduct($_POST['id']))) {
-        array_push($_SESSION['id'], $_POST['id']);
-        header('Location: ./index.php');
-    }
+if (isset($_POST['id']) && $_POST['action'] === 'add' && count(getSingleProduct($_POST['id']))) {
+    array_push($_SESSION['id'], $_POST['id']);
+    header('Location: ./index.php');
 }
+
+$pdo = connection();
 
 if (!count($_SESSION['id'])) {
     $cartProducts = [];
 } else {
     $inQuery = implode(',', array_fill(0, count($_SESSION['id']), '?'));
-    $sql = 'SELECT * FROM products WHERE id IN (' . $inQuery . ');';
-    $stmt = connection()->prepare($sql);
+    $sql = 'SELECT * FROM products WHERE product_id IN (' . $inQuery . ');';
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($_SESSION['id']);
     $cartProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     && !$validation['nameErr']
     && !$validation['detailsErr']
 ) {
-    $number = 0;
+    $productNumber = 0;
     $orderTotal = 0;
 
     $message = '<html><body>';
@@ -70,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     $message .= '<tr><td colspan="5">' . translate('comments') . ': ' . $validation['comment'] . '</td></tr>';
 
     foreach ($cartProducts as $cartProduct) {
-        $prices[$cartProduct['id']] = $cartProduct['price'];
+        $prices[$cartProduct['product_id']] = $cartProduct['price'];
         $orderTotal += $cartProduct['price'];
-        $message .= '<tr><td>' . ++$number . '</td>';
+        $message .= '<tr><td>' . ++$productNumber . '</td>';
         $message .= '<td><img src="' . $_SERVER['HTTP_ORIGIN'] . '/images/' . $cartProduct['image_url'] . '" ';
         $message .= 'alt="' . translate('product_image') . '"></td>';
         $message .= '<td>' . $cartProduct['title'] . '</td>';
@@ -92,21 +92,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
 
     $email = mail(MANAGER_EMAIL, translate('order'), $message, $headers);
 
-    $purchasedProducts = implode(',', $_SESSION['id']);
     $customerDetails = translate('name') . ': ' . $validation['name'] . '; '
         . translate('contact_details') . ': ' . $validation['details'] . '; '
         . translate('comments') . ': ' . $validation['comment'];
     $productsPrices = json_encode($prices);
-    $queryValues = [date('Y:m:d'), $customerDetails, $purchasedProducts, $productsPrices, $orderTotal];
+    $queryValues = [date('Y:m:d'), $customerDetails, $productsPrices, $orderTotal];
     $sql = 'INSERT INTO orders
                     (creation_date,
                     customer_details,
-                    purchased_products,
                     products_prices,
                     total_price)
-                    VALUES (?, ?, ?, ?, ?);';
-    $stmt = connection()->prepare($sql);
+                    VALUES (?, ?, ?, ?);';
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($queryValues);
+    $orderId = $pdo->lastInsertId();
+    $purchasedProducts = $_SESSION['id'];
+
+    foreach ($purchasedProducts as $purchasedProduct) {
+        $stmt = $pdo->prepare('INSERT INTO order_products VALUES (?, ?);');
+        $stmt->execute([$orderId, $purchasedProduct]);
+    }
+
     $_SESSION['id'] = [];
     header('Location: ./index.php');
 }
@@ -129,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
                     <div><?= $cartProduct['price']; ?></div>
                 </div>
                 <form action="./cart.php" method="post">
-                    <input type="hidden" name="id" value="<?= $cartProduct['id']; ?>">
+                    <input type="hidden" name="id" value="<?= $cartProduct['product_id']; ?>">
                     <input type="hidden" name="action" value="remove">
                     <input type="submit" value="<?= translate('remove'); ?>">
                 </form>

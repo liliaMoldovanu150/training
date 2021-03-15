@@ -39,5 +39,12 @@ define('TRANSLATIONS', [
     'date' => 'Date',
     'title_required' => 'Title is required',
     'description_required' => 'Description is required',
-    'price_required' => 'Price is required'
+    'price_required' => 'Price is required',
+    'invalid_parameters' => 'Invalid parameters',
+    'no_file' => 'No file sent',
+    'exceeded_limit' => 'Exceeded filesize limit',
+    'unknown_errors' => 'Unknown errors',
+    'invalid_file_format' => 'Invalid file format',
+    'failed_to_move_file' => 'Failed to move uploaded file',
+    'image_required' => 'Image is required'
 ]);
