@@ -8,6 +8,7 @@ if (isset($_POST['action']) == 'logout') {
 
 if (!isset($_SESSION['login_user'])) {
     header('Location: ./index.php');
+    die();
 }
 
 if (isset($_POST['id'])) {
@@ -19,6 +20,7 @@ if (isset($_POST['id'])) {
         removeItemFromCart();
     }
     header('Location: ./products.php');
+    die();
 }
 
 $allProducts = getAllProducts();

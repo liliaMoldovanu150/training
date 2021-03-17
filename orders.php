@@ -4,6 +4,7 @@ require_once './common.php';
 
 if (!isset($_SESSION['login_user'])) {
     header('Location: ./index.php');
+    die();
 }
 
 $pdo = connection();
@@ -33,8 +34,8 @@ foreach ($orders as $key => $order) {
         <?php foreach ($orders as $order): ?>
             <div class="order">
                 <div class="order-details">
-                    <div><?= translate('id') . ': ' . $order['order_id']; ?></div>
-                    <div><?= translate('date') . ': ' . $order['creation_date']; ?></div>
+                    <div><?= translate('id'); ?>: <?= $order['order_id']; ?></div>
+                    <div><?= translate('date'); ?>: <?= $order['creation_date']; ?></div>
                     <div><?= $order['customer_details']; ?></div>
                 </div>
                 <div class="order-products">
@@ -46,12 +47,11 @@ foreach ($orders as $key => $order) {
                             </div>
                             <div class="product-features">
                                 <div><?= $orderProduct['title']; ?></div>
-                                <?php $productsPrices = json_decode($order['products_prices'], true); ?>
-                                <div><?= $productsPrices[$orderProduct['product_id']]; ?></div>
+                                <div><?= $orderProduct['product_price']; ?></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
-                    <div class="total-price"><?= translate('order_total') . ': ' . $order['total_price']; ?></div>
+                    <div class="total-price"><?= translate('order_total'); ?>: <?= $order['total_price']; ?></div>
                 </div>
             </div>
             <hr>

@@ -2,9 +2,9 @@
 
 require_once './common.php';
 
+$username = $password = '';
+
 $validation = [
-    'username' => '',
-    'password' => '',
     'usernameErr' => '',
     'passwordErr' => '',
     'errorMessage' => '',
@@ -14,20 +14,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_POST['username'])) {
         $validation['usernameErr'] = translate('enter_username');
     } else {
-        $validation['username'] = strip_tags($_POST['username']);
+        $username = strip_tags($_POST['username']);
     }
 
     if (empty($_POST['password'])) {
         $validation['passwordErr'] = translate('enter_password');
     } else {
-        $validation['password'] = strip_tags($_POST['password']);
+        $password = strip_tags($_POST['password']);
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$validation['usernameErr'] && !$validation['passwordErr']) {
-    if ($validation['username'] === ADMIN_USERNAME && password_verify($validation['password'], ADMIN_PASSWORD)) {
-        $_SESSION['login_user'] = $validation['username'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !array_filter($validation)) {
+    if ($username === ADMIN_USERNAME && password_verify($password, ADMIN_PASSWORD)) {
+        $_SESSION['login_user'] = $username;
         header('Location: ./products.php');
+        die();
     } else {
         $validation['errorMessage'] = translate('invalid');
     }
