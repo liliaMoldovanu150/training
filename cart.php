@@ -54,40 +54,22 @@ $totalPrice = 0;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && !array_filter($validation)) {
     $orderTotal = 0;
 
-//    $message = '<html><body>';
-//    $message .= '<table>';
-//    $message .= '<tr><td colspan="5">' . translate('customer_name') . ': ' . $validation['name'] . '</td></tr>';
-//    $message .= '<tr><td colspan="5">'
-//        . translate('contact_details') . ': '
-//        . $details . '</td></tr>';
-//    $message .= '<tr><td colspan="5">' . translate('comments') . ': ' . $comment . '</td></tr>';
-//
-//    foreach ($cartProducts as $cartProduct) {
-//        $prices[$cartProduct['product_id']] = $cartProduct['price'];
-//        $orderTotal += $cartProduct['price'];
-//        $message .= '<tr><td>' . ++$productNumber . '</td>';
-//        $message .= '<td><img src="' . $_SERVER['HTTP_ORIGIN'] . '/images/' . $cartProduct['image_url'] . '" ';
-//        $message .= 'alt="' . translate('product_image') . '"></td>';
-//        $message .= '<td>' . $cartProduct['title'] . '</td>';
-//        $message .= '<td>' . $cartProduct['description'] . '</td>';
-//        $message .= '<td>' . $cartProduct['price'] . '</td>';
-//        $message .= '</tr>';
-//    }
-//
-//    $message .= '<tr><td colspan="5">' . translate('total_price') . ': ' . $orderTotal . '</td></tr>';
-//    $message .= '</table>';
-//    $message .= '</body></html>';
-
-//    $headers = [
-//        'From' => 'example@example.com',
-//        'Content-type' => 'text/html; charset=iso-8859-1'
-//    ];
-//
-//    $email = mail(MANAGER_EMAIL, translate('order'), $message, $headers);
-
     foreach ($cartProducts as $cartProduct) {
         $orderTotal += $cartProduct['price'];
     }
+
+    ob_start();
+    include("email_template.php");
+    $message = ob_get_contents();
+    ob_end_clean();
+
+    $headers = [
+        'From' => 'example@example.com',
+        'MIME-Version' => '1.0',
+        'Content-type' => 'text/html; charset=iso-8859-1'
+    ];
+
+    $email = mail(MANAGER_EMAIL, translate('order'), $message, $headers);
 
     $customerDetails = translate('name') . ': ' . $name . '; '
         . translate('contact_details') . ': ' . $details . '; '
