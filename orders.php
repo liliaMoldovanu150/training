@@ -36,7 +36,9 @@ foreach ($orders as $key => $order) {
                 <div class="order-details">
                     <div><?= translate('id'); ?>: <?= $order['order_id']; ?></div>
                     <div><?= translate('date'); ?>: <?= $order['creation_date']; ?></div>
-                    <div><?= $order['customer_details']; ?></div>
+                    <div><?= translate('name'); ?>: <?= $order['customer_name']; ?></div>
+                    <div><?= translate('contact_details'); ?>: <?= $order['contact_details']; ?></div>
+                    <div><?= translate('comments'); ?>: <?= $order['comments']; ?></div>
                 </div>
                 <div class="order-products">
                     <?php foreach ($order['orderProducts'] as $orderProduct): ?>

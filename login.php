@@ -44,19 +44,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !array_filter($validation)) {
                     type="text"
                     name="username"
                     placeholder="<?= translate('username'); ?>"
-                    value="<?= $_POST['username'] ?? ''; ?>"
+                    value="<?= $username; ?>"
             >
             <br>
-            <span class="error"><?= $validation['usernameErr']; ?></span>
+            <?php if ($validation['usernameErr']): ?>
+                <span class="error"><?= $validation['usernameErr']; ?></span>
+            <?php endif; ?>
             <br><br>
             <input
-                    type="text"
+                    type="password"
                     name="password"
                     placeholder="<?= translate('password'); ?>"
-                    value="<?= $_POST['password'] ?? ''; ?>"
+                    value="<?= $password; ?>"
             >
             <br>
-            <span class="error"><?= $validation['passwordErr']; ?></span>
+            <?php if ($validation['passwordErr']): ?>
+                <span class="error"><?= $validation['passwordErr']; ?></span>
+            <?php endif; ?>
             <?php if ($validation['errorMessage']): ?>
                 <p class="error"><?= $validation['errorMessage']; ?></p>
             <?php endif; ?>

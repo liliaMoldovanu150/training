@@ -100,34 +100,42 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
         <input
                 type="text"
                 name="title"
-                value="<?= $_POST['title'] ?? ($editProduct['title'] ?? ''); ?>"
+                value="<?= $title ?? $editProduct['title']; ?>"
                 placeholder="<?= translate('title'); ?>"
         >
-        <span class="error"><?= $validation['titleErr']; ?></span>
+        <?php if ($validation['titleErr']): ?>
+            <span class="error"><?= $validation['titleErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <input
                 type="text"
                 name="description"
-                value="<?= $_POST['description'] ?? ($editProduct['description'] ?? ''); ?>"
+                value="<?= $description ?? $editProduct['description']; ?>"
                 placeholder="<?= translate('description'); ?>"
         >
-        <span class="error"><?= $validation['descriptionErr']; ?></span>
+        <?php if ($validation['descriptionErr']): ?>
+            <span class="error"><?= $validation['descriptionErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <input
                 type="number"
                 name="price"
                 min="0.00"
                 step="0.01"
-                value="<?= $_POST['price'] ?? ($editProduct['price'] ?? ''); ?>"
+                value="<?= $price ?? $editProduct['price']; ?>"
                 placeholder="<?= translate('price'); ?>"
         >
-        <span class="error"><?= $validation['priceErr']; ?></span>
+        <?php if ($validation['priceErr']): ?>
+            <span class="error"><?= $validation['priceErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <input
                 type="file"
                 name="image"
         >
-        <span class="error"><?= $validation['imageErr']; ?></span>
+        <?php if ($validation['imageErr']): ?>
+            <span class="error"><?= $validation['imageErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <input type="submit" value="<?= translate('save'); ?>">
     </form>

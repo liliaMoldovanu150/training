@@ -50,16 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout') {
 }
 
 $totalPrice = 0;
+foreach ($cartProducts as $cartProduct) {
+    $totalPrice += $cartProduct['price'];
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && !array_filter($validation)) {
-    $orderTotal = 0;
-
-    foreach ($cartProducts as $cartProduct) {
-        $orderTotal += $cartProduct['price'];
-    }
 
     ob_start();
-    include("email_template.php");
+    include('email_template.php');
     $message = ob_get_contents();
     ob_end_clean();
 
@@ -71,15 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
 
     $email = mail(MANAGER_EMAIL, translate('order'), $message, $headers);
 
-    $customerDetails = translate('name') . ': ' . $name . '; '
-        . translate('contact_details') . ': ' . $details . '; '
-        . translate('comments') . ': ' . $comment;
-    $queryValues = [date('Y:m:d'), $customerDetails, $orderTotal];
+    $queryValues = [date('Y-m-d H:i:s'), $name, $details, $comment, $totalPrice];
     $sql = 'INSERT INTO orders
                     (creation_date,
-                    customer_details,
+                    customer_name,
+                    contact_details,
+                    comments,
                     total_price)
-                    VALUES (?, ?, ?);';
+                    VALUES (?, ?, ?, ?, ?);';
     $stmt = $pdo->prepare($sql);
     $stmt->execute($queryValues);
     $orderId = $pdo->lastInsertId();
@@ -102,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
 <div class="content-wrapper">
     <?php if (count($cartProducts)): ?>
         <?php foreach ($cartProducts as $cartProduct): ?>
-            <?php $totalPrice += $cartProduct['price']; ?>
             <div class="product-item">
                 <div class="product-image">
                     <img src="./images/<?= $cartProduct['image_url']; ?>" alt="<?= translate('product_image'); ?>">
@@ -129,23 +125,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
         <input
                 type="text"
                 name="name"
-                value="<?= $_POST['name'] ?? ''; ?>"
+                value="<?= $name; ?>"
                 placeholder="<?= translate('name'); ?>"
         >
-        <span class="error"><?= $validation['nameErr']; ?></span>
+        <?php if ($validation['nameErr']): ?>
+            <span class="error"><?= $validation['nameErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <input
                 type="text"
                 name="details"
-                value="<?= $_POST['details'] ?? ''; ?>"
+                value="<?= $details; ?>"
                 placeholder="<?= translate('contact_details'); ?>"
         >
-        <span class="error"><?= $validation['detailsErr']; ?></span>
+        <?php if ($validation['detailsErr']): ?>
+            <span class="error"><?= $validation['detailsErr']; ?></span>
+        <?php endif; ?>
         <br><br>
         <textarea
                 rows="4"
                 name="comment"
-                placeholder="<?= translate('comments'); ?>"><?= $_POST['comment'] ?? ''; ?></textarea>
+                placeholder="<?= translate('comments'); ?>"><?= $comment; ?></textarea>
         <br><br>
         <input type="submit" value="<?= translate('checkout'); ?>">
     </form>
