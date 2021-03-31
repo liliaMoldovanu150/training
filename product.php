@@ -16,12 +16,7 @@ $pdo = connection();
 
 $title = $description = $price = '';
 
-$validation = [
-    'titleErr' => '',
-    'descriptionErr' => '',
-    'priceErr' => '',
-    'imageErr' => ''
-];
+$validation = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
     if (empty($_POST['title'])) {
@@ -103,7 +98,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
                 value="<?= $editProduct['title'] ?? $title; ?>"
                 placeholder="<?= translate('title'); ?>"
         >
-        <?php if ($validation['titleErr']): ?>
+        <?php if (isset($validation['titleErr'])): ?>
             <span class="error"><?= $validation['titleErr']; ?></span>
         <?php endif; ?>
         <br><br>
@@ -113,7 +108,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
                 value="<?= $editProduct['description'] ?? $description; ?>"
                 placeholder="<?= translate('description'); ?>"
         >
-        <?php if ($validation['descriptionErr']): ?>
+        <?php if (isset($validation['descriptionErr'])): ?>
             <span class="error"><?= $validation['descriptionErr']; ?></span>
         <?php endif; ?>
         <br><br>
@@ -125,7 +120,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
                 value="<?= $editProduct['price'] ?? $price; ?>"
                 placeholder="<?= translate('price'); ?>"
         >
-        <?php if ($validation['priceErr']): ?>
+        <?php if (isset($validation['priceErr'])): ?>
             <span class="error"><?= $validation['priceErr']; ?></span>
         <?php endif; ?>
         <br><br>
@@ -133,7 +128,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
                 type="file"
                 name="image"
         >
-        <?php if ($validation['imageErr']): ?>
+        <?php if (isset($validation['imageErr'])): ?>
             <span class="error"><?= $validation['imageErr']; ?></span>
         <?php endif; ?>
         <br><br>

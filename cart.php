@@ -26,10 +26,7 @@ if (!count($_SESSION['id'])) {
 
 $name = $details = $comment = '';
 
-$validation = [
-    'nameErr' => '',
-    'detailsErr' => ''
-];
+$validation = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout') {
     if (empty($_POST['name'])) {
@@ -126,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
                 value="<?= $name; ?>"
                 placeholder="<?= translate('name'); ?>"
         >
-        <?php if ($validation['nameErr']): ?>
+        <?php if (isset($validation['nameErr'])): ?>
             <span class="error"><?= $validation['nameErr']; ?></span>
         <?php endif; ?>
         <br><br>
@@ -136,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
                 value="<?= $details; ?>"
                 placeholder="<?= translate('contact_details'); ?>"
         >
-        <?php if ($validation['detailsErr']): ?>
+        <?php if (isset($validation['detailsErr'])): ?>
             <span class="error"><?= $validation['detailsErr']; ?></span>
         <?php endif; ?>
         <br><br>

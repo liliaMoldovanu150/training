@@ -4,11 +4,7 @@ require_once './common.php';
 
 $username = $password = '';
 
-$validation = [
-    'usernameErr' => '',
-    'passwordErr' => '',
-    'errorMessage' => '',
-];
+$validation = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_POST['username'])) {
@@ -24,14 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !array_filter($validation)) {
-    if ($username === ADMIN_USERNAME && password_verify($password, ADMIN_PASSWORD)) {
-        $_SESSION['login_user'] = $username;
-        header('Location: ./products.php');
-        die();
-    } else {
-        $validation['errorMessage'] = translate('invalid');
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && !array_filter($validation)
+    && $username === ADMIN_USERNAME
+    && password_verify($password, HASHED_ADMIN_PASSWORD)
+) {
+    $_SESSION['login_user'] = $username;
+    header('Location: ./products.php');
+    die();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && !array_filter($validation)
+    && ($username !== ADMIN_USERNAME
+        || !password_verify($password, HASHED_ADMIN_PASSWORD))
+) {
+    $validation['errorMessage'] = translate('invalid');
 }
 
 ?>
@@ -47,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !array_filter($validation)) {
                     value="<?= $username; ?>"
             >
             <br>
-            <?php if ($validation['usernameErr']): ?>
+            <?php if (isset($validation['usernameErr'])): ?>
                 <span class="error"><?= $validation['usernameErr']; ?></span>
             <?php endif; ?>
             <br><br>
@@ -58,10 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !array_filter($validation)) {
                     value="<?= $password; ?>"
             >
             <br>
-            <?php if ($validation['passwordErr']): ?>
+            <?php if (isset($validation['passwordErr'])): ?>
                 <span class="error"><?= $validation['passwordErr']; ?></span>
             <?php endif; ?>
-            <?php if ($validation['errorMessage']): ?>
+            <?php if (isset($validation['errorMessage'])): ?>
                 <p class="error"><?= $validation['errorMessage']; ?></p>
             <?php endif; ?>
             <br><br>
