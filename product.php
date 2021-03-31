@@ -38,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
     }
 }
 
-$isEditMode = isset($_POST['title']) && isset($_SESSION['editProductId']);
-$isAddMode = isset($_POST['title']) && !isset($_SESSION['editProductId']);
+$editMode = $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['editProductId']);
+$addMode = $_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_SESSION['editProductId']);
 
 $imageUrl = null;
 
@@ -49,11 +49,11 @@ if (!empty($_FILES['image']['name'])) {
         . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 }
 
-if ($isAddMode && !$imageUrl) {
+if ($addMode && !$imageUrl) {
     $validation['imageErr'] = translate('image_required');
 }
 
-if ($isAddMode && !array_filter($validation) && $imageUrl && uploadImage()) {
+if ($addMode && !array_filter($validation) && uploadImage()) {
     $queryValues = [$title, $description, $price, $imageUrl];
     $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
     $stmt = $pdo->prepare($sql);
@@ -62,7 +62,7 @@ if ($isAddMode && !array_filter($validation) && $imageUrl && uploadImage()) {
     die();
 }
 
-if ($isEditMode && !array_filter($validation) && !$imageUrl) {
+if ($editMode && !array_filter($validation) && !$imageUrl) {
     $queryValues = [$title, $description, $price];
     $sql = 'UPDATE products SET title = ?, description = ?, price = ? WHERE product_id = '
         . $_SESSION['editProductId']
@@ -74,7 +74,7 @@ if ($isEditMode && !array_filter($validation) && !$imageUrl) {
     die();
 }
 
-if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
+if ($editMode && !array_filter($validation) && uploadImage()) {
     $queryValues = [$title, $description, $price, $imageUrl];
     $sql = 'UPDATE products SET title = ?, description = ?, price = ?, image_url = ? WHERE product_id = '
         . $_SESSION['editProductId']

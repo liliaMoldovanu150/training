@@ -28,37 +28,35 @@ foreach ($orders as $key => $order) {
 
 <?php require_once './view/header.view.php'; ?>
 
-<?php if (count($orders)): ?>
-    <div class="orders-wrapper">
-        <h1 class="order-heading"><?= translate('orders'); ?></h1>
-        <?php foreach ($orders as $order): ?>
-            <div class="order">
-                <div class="order-details">
-                    <div><?= translate('id'); ?>: <?= $order['order_id']; ?></div>
-                    <div><?= translate('date'); ?>: <?= $order['creation_date']; ?></div>
-                    <div><?= translate('name'); ?>: <?= $order['customer_name']; ?></div>
-                    <div><?= translate('contact_details'); ?>: <?= $order['contact_details']; ?></div>
-                    <div><?= translate('comments'); ?>: <?= $order['comments']; ?></div>
-                </div>
-                <div class="order-products">
-                    <?php foreach ($order['orderProducts'] as $orderProduct): ?>
-                        <div class="product-item">
-                            <div class="product-image order-image">
-                                <img src="./images/<?= $orderProduct['image_url']; ?>"
-                                     alt="<?= translate('product_image'); ?>">
-                            </div>
-                            <div class="product-features">
-                                <div><?= $orderProduct['title']; ?></div>
-                                <div><?= $orderProduct['product_price']; ?></div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                    <div class="total-price"><?= translate('order_total'); ?>: <?= $order['total_price']; ?></div>
-                </div>
+<div class="orders-wrapper">
+    <h1 class="order-heading"><?= translate('orders'); ?></h1>
+    <?php foreach ($orders as $order): ?>
+        <div class="order">
+            <div class="order-details">
+                <div><?= translate('id'); ?>: <?= $order['order_id']; ?></div>
+                <div><?= translate('date'); ?>: <?= $order['creation_date']; ?></div>
+                <div><?= translate('name'); ?>: <?= $order['customer_name']; ?></div>
+                <div><?= translate('contact_details'); ?>: <?= $order['contact_details']; ?></div>
+                <div><?= translate('comments'); ?>: <?= $order['comments']; ?></div>
             </div>
-            <hr>
-        <?php endforeach; ?>
-    </div>
-<?php endif; ?>
+            <div class="order-products">
+                <?php foreach ($order['orderProducts'] as $orderProduct): ?>
+                    <div class="product-item">
+                        <div class="product-image order-image">
+                            <img src="./images/<?= $orderProduct['image_url']; ?>"
+                                 alt="<?= translate('product_image'); ?>">
+                        </div>
+                        <div class="product-features">
+                            <div><?= $orderProduct['title']; ?></div>
+                            <div><?= $orderProduct['product_price']; ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <div class="total-price"><?= translate('order_total'); ?>: <?= $order['total_price']; ?></div>
+            </div>
+        </div>
+        <hr>
+    <?php endforeach; ?>
+</div>
 
 <?php require_once './view/footer.view.php'; ?>
