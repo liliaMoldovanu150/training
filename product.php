@@ -100,7 +100,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
         <input
                 type="text"
                 name="title"
-                value="<?= $title ?? $editProduct['title']; ?>"
+                value="<?= $editProduct['title'] ?? $title; ?>"
                 placeholder="<?= translate('title'); ?>"
         >
         <?php if ($validation['titleErr']): ?>
@@ -110,7 +110,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
         <input
                 type="text"
                 name="description"
-                value="<?= $description ?? $editProduct['description']; ?>"
+                value="<?= $editProduct['description'] ?? $description; ?>"
                 placeholder="<?= translate('description'); ?>"
         >
         <?php if ($validation['descriptionErr']): ?>
@@ -122,7 +122,7 @@ if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
                 name="price"
                 min="0.00"
                 step="0.01"
-                value="<?= $price ?? $editProduct['price']; ?>"
+                value="<?= $editProduct['price'] ?? $price; ?>"
                 placeholder="<?= translate('price'); ?>"
         >
         <?php if ($validation['priceErr']): ?>

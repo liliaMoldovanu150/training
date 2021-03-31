@@ -55,7 +55,6 @@ foreach ($cartProducts as $cartProduct) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && !array_filter($validation)) {
-
     ob_start();
     include('email_template.php');
     $message = ob_get_contents();
@@ -80,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($queryValues);
     $orderId = $pdo->lastInsertId();
-    $purchasedProducts = $_SESSION['id'];
 
     foreach ($cartProducts as $cartProduct) {
         $stmt = $pdo->prepare('INSERT INTO order_products VALUES (?, ?, ?);');
