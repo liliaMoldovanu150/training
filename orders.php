@@ -9,15 +9,15 @@ if (!isset($_SESSION['login_user'])) {
 
 $pdo = connection();
 
-$sql = 'SELECT * FROM orders';
+$sql = 'SELECT * FROM orders;';
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($orders as $key => $order) {
-    $sql = 'SELECT * FROM products INNER JOIN order_products ON order_products.order_id='
+    $sql = 'SELECT * FROM products INNER JOIN order_products ON order_products.order_id = '
         . $order['order_id']
-        . ' WHERE order_products.product_id=products.product_id;';
+        . ' WHERE order_products.product_id = products.product_id;';
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $orderProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);

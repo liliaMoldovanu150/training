@@ -7,9 +7,9 @@ if (!isset($_SESSION['login_user'])) {
     die();
 }
 
-if (isset($_POST['id'])) {
-    $_SESSION['editProductId'] = $_POST['id'];
-    $editProduct = getSingleProduct($_POST['id']);
+if (isset($_GET['id'])) {
+    $_SESSION['editProductId'] = $_GET['id'];
+    $editProduct = getSingleProduct($_GET['id']);
 }
 
 $pdo = connection();
@@ -64,7 +64,7 @@ if ($isAddMode && !array_filter($validation) && $imageUrl && uploadImage()) {
 
 if ($isEditMode && !array_filter($validation) && !$imageUrl) {
     $queryValues = [$title, $description, $price];
-    $sql = 'UPDATE products SET title=?, description=?, price=? WHERE product_id='
+    $sql = 'UPDATE products SET title = ?, description = ?, price = ? WHERE product_id = '
         . $_SESSION['editProductId']
         . ';';
     $stmt = $pdo->prepare($sql);
@@ -76,7 +76,7 @@ if ($isEditMode && !array_filter($validation) && !$imageUrl) {
 
 if ($isEditMode && !array_filter($validation) && $imageUrl && uploadImage()) {
     $queryValues = [$title, $description, $price, $imageUrl];
-    $sql = 'UPDATE products SET title=?, description=?, price=?, image_url=? WHERE product_id='
+    $sql = 'UPDATE products SET title = ?, description = ?, price = ?, image_url = ? WHERE product_id = '
         . $_SESSION['editProductId']
         . ';';
     $stmt = $pdo->prepare($sql);
