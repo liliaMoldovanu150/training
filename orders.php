@@ -9,20 +9,11 @@ if (!isset($_SESSION['login_user'])) {
 
 $pdo = connection();
 
-$sql = 'SELECT * FROM orders;';
+$sql = 'SELECT o.order_id, o.total_price FROM orders o;';
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($orders as $key => $order) {
-    $sql = 'SELECT * FROM products INNER JOIN order_products ON order_products.order_id = '
-        . $order['order_id']
-        . ' WHERE order_products.product_id = products.product_id;';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $orderProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $orders[$key]['orderProducts'] = $orderProducts;
-}
 
 ?>
 
@@ -31,30 +22,12 @@ foreach ($orders as $key => $order) {
 <div class="orders-wrapper">
     <h1 class="order-heading"><?= translate('orders'); ?></h1>
     <?php foreach ($orders as $order): ?>
-        <div class="order">
-            <div class="order-details">
+        <a style="text-decoration: none; color: black" href="./order.php?id=<?= $order['order_id']; ?>">
+            <div class="order" style="display: flex; justify-content: space-around">
                 <div><?= translate('id'); ?>: <?= $order['order_id']; ?></div>
-                <div><?= translate('date'); ?>: <?= $order['creation_date']; ?></div>
-                <div><?= translate('name'); ?>: <?= $order['customer_name']; ?></div>
-                <div><?= translate('contact_details'); ?>: <?= $order['contact_details']; ?></div>
-                <div><?= translate('comments'); ?>: <?= $order['comments']; ?></div>
-            </div>
-            <div class="order-products">
-                <?php foreach ($order['orderProducts'] as $orderProduct): ?>
-                    <div class="product-item">
-                        <div class="product-image order-image">
-                            <img src="./images/<?= $orderProduct['image_url']; ?>"
-                                 alt="<?= translate('product_image'); ?>">
-                        </div>
-                        <div class="product-features">
-                            <div><?= $orderProduct['title']; ?></div>
-                            <div><?= $orderProduct['product_price']; ?></div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
                 <div class="total-price"><?= translate('order_total'); ?>: <?= $order['total_price']; ?></div>
             </div>
-        </div>
+        </a>
         <hr>
     <?php endforeach; ?>
 </div>
