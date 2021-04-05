@@ -8,8 +8,10 @@ if (!isset($_SESSION['login_user'])) {
 }
 
 if (isset($_GET['id'])) {
-    $_SESSION['editProductId'] = $_GET['id'];
+    $editProductId = $_GET['id'];
     $editProduct = getSingleProduct($_GET['id']);
+} elseif (isset($_POST['id'])) {
+    $editProductId = $_POST['id'];
 }
 
 $pdo = connection();
@@ -18,7 +20,7 @@ $title = $description = $price = '';
 
 $validation = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (empty($_POST['title'])) {
         $validation['titleErr'] = translate('title_required');
     } else {
@@ -38,15 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
     }
 }
 
-$editMode = $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['editProductId']);
-$addMode = $_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_SESSION['editProductId']);
+$editMode = $_SERVER['REQUEST_METHOD'] === 'POST' && isset($editProductId);
+$addMode = $_SERVER['REQUEST_METHOD'] === 'POST' && !isset($editProductId);
 
 $imageUrl = null;
 
 if (!empty($_FILES['image']['name'])) {
-    $imageUrl = sha1_file($_FILES['image']['tmp_name'])
-        . '.'
-        . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    $imageUrl = time() . '.' . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 }
 
 if ($addMode && !$imageUrl) {
@@ -63,25 +63,21 @@ if ($addMode && !array_filter($validation) && uploadImage()) {
 }
 
 if ($editMode && !array_filter($validation) && !$imageUrl) {
-    $queryValues = [$title, $description, $price];
-    $sql = 'UPDATE products SET title = ?, description = ?, price = ? WHERE product_id = '
-        . $_SESSION['editProductId']
-        . ';';
+    $queryValues = [$title, $description, $price, $editProductId];
+    $sql = 'UPDATE products SET title = ?, description = ?, price = ? WHERE product_id = ?;';
     $stmt = $pdo->prepare($sql);
     $stmt->execute($queryValues);
-    unset($_SESSION['editProductId']);
+    $editProductId = null;
     header('Location: ./products.php');
     die();
 }
 
 if ($editMode && !array_filter($validation) && uploadImage()) {
-    $queryValues = [$title, $description, $price, $imageUrl];
-    $sql = 'UPDATE products SET title = ?, description = ?, price = ?, image_url = ? WHERE product_id = '
-        . $_SESSION['editProductId']
-        . ';';
+    $queryValues = [$title, $description, $price, $imageUrl, $editProductId];
+    $sql = 'UPDATE products SET title = ?, description = ?, price = ?, image_url = ? WHERE product_id = ?;';
     $stmt = $pdo->prepare($sql);
     $stmt->execute($queryValues);
-    unset($_SESSION['editProductId']);
+    $editProductId = null;
     header('Location: ./products.php');
     die();
 }
@@ -92,6 +88,9 @@ if ($editMode && !array_filter($validation) && uploadImage()) {
 
 <div class="content-wrapper">
     <form action="./product.php" method="post" enctype="multipart/form-data">
+        <?php if (isset($editProduct)): ?>
+            <input type="hidden" name="id" value="<?= $editProduct['product_id']; ?>">
+        <?php endif; ?>
         <input
                 type="text"
                 name="title"
@@ -132,7 +131,7 @@ if ($editMode && !array_filter($validation) && uploadImage()) {
             <span class="error"><?= $validation['imageErr']; ?></span>
         <?php endif; ?>
         <br><br>
-        <input type="submit" value="<?= translate('save'); ?>">
+        <input type="submit" name="submit" value="<?= translate('save'); ?>">
     </form>
     <a class="go" href="./products.php"><?= translate('products'); ?></a>
 </div>
