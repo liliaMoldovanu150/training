@@ -25,7 +25,7 @@ function getAllProducts(): array
 
 function getSingleProduct($productId): array
 {
-    $sql = 'SELECT * FROM products WHERE product_id=?;';
+    $sql = 'SELECT * FROM products WHERE product_id = ?;';
     $stmt = connection()->prepare($sql);
     $stmt->execute([$productId]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -87,7 +87,7 @@ function uploadImage()
     if (!move_uploaded_file(
         $_FILES['image']['tmp_name'],
         sprintf('./images/%s.%s',
-            sha1_file($_FILES['image']['tmp_name']),
+            time(),
             $ext
         )
     )) {

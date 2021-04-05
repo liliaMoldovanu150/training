@@ -53,7 +53,7 @@ foreach ($cartProducts as $cartProduct) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout' && !array_filter($validation)) {
     ob_start();
-    include('email_template.php');
+    include ('email_template.php');
     $message = ob_get_contents();
     ob_end_clean();
 
