@@ -47,13 +47,14 @@ $imageUrl = null;
 
 if (!empty($_FILES['image']['name'])) {
     $imageUrl = time() . '.' . pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    uploadImage();
 }
 
 if ($addMode && !$imageUrl) {
     $validation['imageErr'] = translate('image_required');
 }
 
-if ($addMode && !array_filter($validation) && uploadImage()) {
+if ($addMode && !array_filter($validation)) {
     $queryValues = [$title, $description, $price, $imageUrl];
     $sql = 'INSERT INTO products (title, description, price, image_url) VALUES (?, ?, ?, ?);';
     $stmt = $pdo->prepare($sql);
@@ -72,7 +73,7 @@ if ($editMode && !array_filter($validation) && !$imageUrl) {
     die();
 }
 
-if ($editMode && !array_filter($validation) && uploadImage()) {
+if ($editMode && !array_filter($validation)) {
     $queryValues = [$title, $description, $price, $imageUrl, $editProductId];
     $sql = 'UPDATE products SET title = ?, description = ?, price = ?, image_url = ? WHERE product_id = ?;';
     $stmt = $pdo->prepare($sql);
