@@ -46,5 +46,6 @@ define('TRANSLATIONS', [
     'unknown_errors' => 'Unknown errors',
     'invalid_file_format' => 'Invalid file format',
     'failed_to_move_file' => 'Failed to move uploaded file',
-    'image_required' => 'Image is required'
+    'image_required' => 'Image is required',
+    'no_order' => 'There is no order with ID'
 ]);

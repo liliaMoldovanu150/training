@@ -49,7 +49,7 @@ $orderInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     <?php else: ?>
-        <p>There is no order with ID: <?= $_GET['id']; ?></p>
+        <p><?= translate('no_order'); ?>: <?= $_GET['id']; ?></p>
     <?php endif; ?>
     <hr>
 </div>
